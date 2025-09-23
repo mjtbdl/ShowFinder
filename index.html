@@ -17,212 +17,178 @@
         </div>
     </header>
 
-    <!-- Navigation -->
-    <nav class="bg-secondary-dark/80 backdrop-blur-md sticky top-0 z-50 border-b border-teal-main/20">
-        <div class="container mx-auto px-4 py-4">
-            <div class="flex flex-wrap justify-center gap-4">
-                <button onclick="showSection('search')" class="nav-btn">
-                    <span>🔍</span> Search Show
-                </button>
-                <button onclick="showSection('surprise')" class="nav-btn">
-                    <span>🎲</span> Surprise Me
-                </button>
-                <button onclick="showSection('finder')" class="nav-btn">
-                    <span>🎯</span> Show Finder
-                </button>
+    <main class="container mx-auto px-4 py-8 min-h-screen flex items-center justify-center">
+        <!-- Main Panel Container -->
+        <div class="panel-container">
+            
+            <!-- Show Finder Panel -->
+            <div id="showFinderPanel" class="main-panel">
+                
+                <!-- Initial Welcome State -->
+                <div id="welcomeState" class="welcome-state">
+                    <div class="welcome-content">
+                        <h2 class="welcome-title">Ready to Find Your Next Show?</h2>
+                        <p class="welcome-subtitle">Answer a few quick questions and we'll find the perfect match</p>
+                        <button id="startFinderBtn" class="start-btn">
+                            <span>🎯</span>
+                            <span>Find Me a Show</span>
+                        </button>
+                        
+                        <!-- Search Show Button -->
+                        <div class="search-toggle">
+                            <button id="searchToggleBtn" class="search-toggle-btn">
+                                <span>🔍</span>
+                                <span>Or Search for Specific Show</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card Deck State -->
+                <div id="cardDeckState" class="card-deck-state hidden">
+                    <div class="deck-container">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progressFill"></div>
+                        </div>
+                        
+                        <div class="card-stack">
+                            <!-- Language Card -->
+                            <div class="question-card active" data-question="language">
+                                <div class="card-content">
+                                    <h3 class="card-title">Do you prefer any language?</h3>
+                                    <div class="card-options">
+                                        <button class="option-btn" data-value="English">🇺🇸 English</button>
+                                        <button class="option-btn" data-value="Spanish">🇪🇸 Spanish</button>
+                                        <button class="option-btn" data-value="French">🇫🇷 French</button>
+                                        <button class="option-btn" data-value="German">🇩🇪 German</button>
+                                        <button class="option-btn" data-value="Japanese">🇯🇵 Japanese</button>
+                                        <button class="option-btn" data-value="Korean">🇰🇷 Korean</button>
+                                        <button class="skip-btn" data-value="">✨ No preference</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Genre Card -->
+                            <div class="question-card" data-question="genre">
+                                <div class="card-content">
+                                    <h3 class="card-title">What genre excites you?</h3>
+                                    <div class="card-options">
+                                        <button class="option-btn" data-value="Drama">🎭 Drama</button>
+                                        <button class="option-btn" data-value="Comedy">😂 Comedy</button>
+                                        <button class="option-btn" data-value="Action">💥 Action</button>
+                                        <button class="option-btn" data-value="Horror">😱 Horror</button>
+                                        <button class="option-btn" data-value="Science-Fiction">🚀 Sci-Fi</button>
+                                        <button class="option-btn" data-value="Mystery">🔍 Mystery</button>
+                                        <button class="option-btn" data-value="Romance">💖 Romance</button>
+                                        <button class="option-btn" data-value="Crime">🔫 Crime</button>
+                                        <button class="skip-btn" data-value="">✨ No preference</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Show Type Card -->
+                            <div class="question-card" data-question="type">
+                                <div class="card-content">
+                                    <h3 class="card-title">What type of show?</h3>
+                                    <div class="card-options">
+                                        <button class="option-btn" data-value="Scripted">📝 Scripted</button>
+                                        <button class="option-btn" data-value="Animation">🎨 Animation</button>
+                                        <button class="option-btn" data-value="Reality">📺 Reality</button>
+                                        <button class="option-btn" data-value="Documentary">📖 Documentary</button>
+                                        <button class="option-btn" data-value="Talk Show">🎤 Talk Show</button>
+                                        <button class="skip-btn" data-value="">✨ No preference</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Rating Card -->
+                            <div class="question-card" data-question="rating">
+                                <div class="card-content">
+                                    <h3 class="card-title">Minimum rating preference?</h3>
+                                    <div class="card-options">
+                                        <button class="option-btn" data-value="9">⭐ 9.0+ (Masterpieces)</button>
+                                        <button class="option-btn" data-value="8">⭐ 8.0+ (Excellent)</button>
+                                        <button class="option-btn" data-value="7">⭐ 7.0+ (Very Good)</button>
+                                        <button class="option-btn" data-value="6">⭐ 6.0+ (Good)</button>
+                                        <button class="skip-btn" data-value="">✨ No preference</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Status Card -->
+                            <div class="question-card" data-question="status">
+                                <div class="card-content">
+                                    <h3 class="card-title">Show status preference?</h3>
+                                    <div class="card-options">
+                                        <button class="option-btn" data-value="Running">🔴 Currently Airing</button>
+                                        <button class="option-btn" data-value="Ended">✅ Completed Series</button>
+                                        <button class="option-btn" data-value="To Be Determined">❓ Status Unknown</button>
+                                        <button class="skip-btn" data-value="">✨ No preference</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Search State (Flipped) -->
+                <div id="searchState" class="search-state hidden">
+                    <div class="search-content">
+                        <h2 class="search-title">Search for a Specific Show</h2>
+                        <p class="search-subtitle">Enter the name of the show you're looking for</p>
+                        
+                        <form id="searchForm" class="search-form">
+                            <div class="search-input-container">
+                                <input type="text" id="searchInput" placeholder="Enter show name..." required class="search-input">
+                                <button type="submit" class="search-btn">
+                                    <span>🚀</span> Search
+                                </button>
+                            </div>
+                        </form>
+                        
+                        <button id="backToFinderBtn" class="back-btn">
+                            <span>↩️</span> Back to Show Finder
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Results Summary State -->
+                <div id="resultsState" class="results-state hidden">
+                    <div class="results-content">
+                        <h2 class="results-title">Here are your suggestions!</h2>
+                        <p class="results-subtitle">Based on your preferences</p>
+                        
+                        <div class="results-actions">
+                            <button id="startAgainBtn" class="secondary-btn">
+                                <span>🔄</span> Start Again
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Results Panel -->
+            <div id="resultsPanel" class="results-panel">
+                <div class="results-header">
+                    <h2 id="resultsTitle" class="panel-title">Results</h2>
+                    <button id="closeResultsBtn" class="close-btn">✕</button>
+                </div>
+                <div id="resultsContainer" class="results-grid"></div>
             </div>
         </div>
-    </nav>
-
-    <main class="container mx-auto px-4 py-8">
-        <!-- Section 1: Search Show -->
-        <section id="search" class="section-container">
-            <div class="section-header">
-                <h2 class="section-title">Search for a Specific Show</h2>
-                <p class="section-subtitle">Find exactly what you're looking for</p>
-            </div>
-            
-            <form id="searchForm" class="search-form">
-                <div class="search-input-container">
-                    <input type="text" id="searchInput" placeholder="Enter show name..." required class="search-input">
-                    <button type="submit" class="search-btn">
-                        <span>🚀</span> Search
-                    </button>
-                </div>
-            </form>
-        </section>
-
-        <!-- Section 2: Surprise Me -->
-        <section id="surprise" class="section-container hidden">
-            <div class="section-header">
-                <h2 class="section-title">Surprise Me!</h2>
-                <p class="section-subtitle">Let us pick something amazing for you</p>
-            </div>
-            
-            <div class="text-center">
-                <button id="surpriseButton" class="surprise-btn">
-                    <span class="text-2xl">🎯</span>
-                    <span>Give Me a Random Show</span>
-                </button>
-            </div>
-        </section>
-
-        <!-- Section 3: Show Finder -->
-        <section id="finder" class="section-container hidden">
-            <div class="section-header">
-                <h2 class="section-title">Show Finder</h2>
-                <p class="section-subtitle">Answer a few questions to discover your perfect show</p>
-            </div>
-            
-            <form id="finderForm" class="finder-form">
-                <div class="filters-grid">
-                    <div class="filter-group">
-                        <label for="genreFilter" class="filter-label">Genre</label>
-                        <select id="genreFilter" class="filter-select" name="Show[genre]">
-                            <option value=""></option>
-                            <option value="Action">Action</option>
-                            <option value="Adult">Adult</option>
-                            <option value="Adventure">Adventure</option>
-                            <option value="Anime">Anime</option>
-                            <option value="Children">Children</option>
-                            <option value="Comedy">Comedy</option>
-                            <option value="Crime">Crime</option>
-                            <option value="DIY">DIY</option>
-                            <option value="Drama">Drama</option>
-                            <option value="Espionage">Espionage</option>
-                            <option value="Family">Family</option>
-                            <option value="Fantasy">Fantasy</option>
-                            <option value="Food">Food</option>
-                            <option value="History">History</option>
-                            <option value="Horror">Horror</option>
-                            <option value="Legal">Legal</option>
-                            <option value="Medical">Medical</option>
-                            <option value="Music">Music</option>
-                            <option value="Mystery">Mystery</option>
-                            <option value="Nature">Nature</option>
-                            <option value="Romance">Romance</option>
-                            <option value="Science-Fiction">Science-Fiction</option>
-                            <option value="Sports">Sports</option>
-                            <option value="Supernatural">Supernatural</option>
-                            <option value="Thriller">Thriller</option>
-                            <option value="Travel">Travel</option>
-                            <option value="War">War</option>
-                            <option value="Western">Western</option>
-                        </select>
-                    </div>
-
-                    <div class="filter-group">
-                        <label for="languageFilter" class="filter-label">Language</label>
-                        <select id="languageFilter" class="filter-select" name="Show[language_enum]">
-                            <option value=""></option>
-                            <option value="Chinese">Chinese</option>
-                            <option value="Czech">Czech</option>
-                            <option value="Danish">Danish</option>
-                            <option value="Dutch">Dutch</option>
-                            <option value="English">English</option>
-                            <option value="French">French</option>
-                            <option value="German">German</option>
-                            <option value="Hebrew">Hebrew</option>
-                            <option value="Hindi">Hindi</option>
-                            <option value="Hungarian">Hungarian</option>
-                            <option value="Italian">Italian</option>
-                            <option value="Japanese">Japanese</option>
-                            <option value="Korean">Korean</option>
-                            <option value="Norwegian">Norwegian</option>
-                            <option value="Polish">Polish</option>
-                            <option value="Portuguese">Portuguese</option>
-                            <option value="Russian">Russian</option>
-                            <option value="Spanish">Spanish</option>
-                            <option value="Swedish">Swedish</option>
-                            <option value="Thai">Thai</option>
-                            <option value="Turkish">Turkish</option>
-                            <option value="Ukrainian">Ukrainian</option>
-                            <option value="Scottish Gaelic">Scottish Gaelic</option>
-                        </select>
-                    </div>
-
-                    <div class="filter-group">
-                        <label for="statusFilter" class="filter-label">Status</label>
-                        <select id="statusFilter" class="filter-select">
-                            <option value="">Any Status</option>
-                            <option value="Running">Currently Running</option>
-                            <option value="Ended">Ended</option>
-                            <option value="To Be Determined">TBD</option>
-                        </select>
-                    </div>
-
-                    <div class="filter-group">
-                        <label for="typeFilter" class="filter-label">Show Type</label>
-                        <select id="typeFilter" class="filter-select">
-                            <option value="">Any Type</option>
-                            <option value="Scripted">Scripted</option>
-                            <option value="Animation">Animation</option>
-                            <option value="Reality">Reality</option>
-                            <option value="Talk Show">Talk Show</option>
-                            <option value="Documentary">Documentary</option>
-                            <option value="Game Show">Game Show</option>
-                            <option value="Variety">Variety</option>
-                            <option value="News">News</option>
-                            <option value="Sports">Sports</option>
-                        </select>
-                    </div>
-
-                    <div class="filter-group">
-                        <label class="filter-label">Runtime (minutes)</label>
-                        <div class="range-inputs">
-                            <input type="number" id="runtimeMin" placeholder="Min" min="0" max="500" class="filter-input">
-                            <span class="range-separator">to</span>
-                            <input type="number" id="runtimeMax" placeholder="Max" min="0" max="500" class="filter-input">
-                        </div>
-                    </div>
-
-                    <div class="filter-group">
-                        <label class="filter-label">Rating (0-10)</label>
-                        <div class="range-inputs">
-                            <input type="number" id="ratingMin" placeholder="Min" min="0" max="10" step="0.1" class="filter-input">
-                            <span class="range-separator">to</span>
-                            <input type="number" id="ratingMax" placeholder="Max" min="0" max="10" step="0.1" class="filter-input">
-                        </div>
-                    </div>
-
-                    <div class="filter-group">
-                        <label class="filter-label">Year</label>
-                        <div class="range-inputs">
-                            <input type="number" id="yearMin" placeholder="From" min="1900" max="2030" class="filter-input">
-                            <span class="range-separator">to</span>
-                            <input type="number" id="yearMax" placeholder="To" min="1900" max="2030" class="filter-input">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="form-actions">
-                    <button type="submit" class="primary-btn">
-                        <span>🎯</span> Find Shows
-                    </button>
-                    <button type="button" onclick="clearFilters()" class="secondary-btn">
-                        <span>🗑️</span> Clear Filters
-                    </button>
-                </div>
-            </form>
-        </section>
 
         <!-- Loading State -->
         <div id="loading" class="loading-container hidden">
             <div class="loading-spinner"></div>
-            <p class="loading-text">Discovering amazing shows for you...</p>
+            <p class="loading-text">Finding your perfect shows...</p>
         </div>
 
         <!-- Error State -->
         <div id="error" class="error-container hidden">
             <div class="error-icon">⚠️</div>
             <p id="errorMessage" class="error-message"></p>
+            <button id="errorRetryBtn" class="retry-btn">Try Again</button>
         </div>
-
-        <!-- Results Section -->
-        <section id="results" class="results-section">
-            <h2 id="resultsTitle" class="results-title hidden">Results</h2>
-            <div id="resultsContainer" class="results-grid"></div>
-        </section>
     </main>
 
     <script src="app.js"></script>

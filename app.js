@@ -1,101 +1,513 @@
-let allShows = []; // Cache for all shows when needed
-let currentSection = 'search';
-const RESULTS_LIMIT = 10; // Maximum results to show
+// Application State
+let allShows = [];
+let userPreferences = {};
+let currentQuestionIndex = 0;
+const RESULTS_LIMIT = 10;
 
-// Navigation functions
-function showSection(sectionName) {
-    // Hide all sections
-    document.querySelectorAll('.section-container').forEach(section => {
-        section.classList.add('hidden');
-    });
-    
-    // Remove active class from all nav buttons
-    document.querySelectorAll('.nav-btn').forEach(btn => {
-        btn.classList.remove('active');
-    });
-    
-    // Show selected section
-    document.getElementById(sectionName).classList.remove('hidden');
-    
-    // Add active class to clicked button
-    event.target.classList.add('active');
-    
-    currentSection = sectionName;
-    
-    // Clear previous results
-    clearResults();
+const questions = ['language', 'genre', 'type', 'rating', 'status'];
+
+// DOM Elements
+let welcomeState, cardDeckState, searchState, resultsState, resultsPanel, showFinderPanel;
+
+// Initialize Application
+window.addEventListener('load', function() {
+    initializeDOMElements();
+    initializeApp();
+});
+
+function initializeDOMElements() {
+    welcomeState = document.getElementById('welcomeState');
+    cardDeckState = document.getElementById('cardDeckState');
+    searchState = document.getElementById('searchState');
+    resultsState = document.getElementById('resultsState');
+    resultsPanel = document.getElementById('resultsPanel');
+    showFinderPanel = document.getElementById('showFinderPanel');
 }
 
-// Utility functions
+function initializeApp() {
+    resetAppState();
+    showWelcomeState();
+    bindEventListeners();
+}
+
+function resetAppState() {
+    userPreferences = {};
+    currentQuestionIndex = 0;
+    hideAllStates();
+    hideResultsPanel();
+    clearResults();
+    hideError();
+    hideLoading();
+}
+
+// Event Listeners
+function bindEventListeners() {
+    // Start finder button
+    const startFinderBtn = document.getElementById('startFinderBtn');
+    if (startFinderBtn) {
+        startFinderBtn.addEventListener('click', startCardDeck);
+    }
+    
+    // Search toggle button
+    const searchToggleBtn = document.getElementById('searchToggleBtn');
+    if (searchToggleBtn) {
+        searchToggleBtn.addEventListener('click', showSearchState);
+    }
+    
+    // Back to finder button
+    const backToFinderBtn = document.getElementById('backToFinderBtn');
+    if (backToFinderBtn) {
+        backToFinderBtn.addEventListener('click', showWelcomeState);
+    }
+    
+    // Start again button
+    const startAgainBtn = document.getElementById('startAgainBtn');
+    if (startAgainBtn) {
+        startAgainBtn.addEventListener('click', startAgain);
+    }
+    
+    // Close results button
+    const closeResultsBtn = document.getElementById('closeResultsBtn');
+    if (closeResultsBtn) {
+        closeResultsBtn.addEventListener('click', hideResultsPanel);
+    }
+    
+    // Search form
+    const searchForm = document.getElementById('searchForm');
+    if (searchForm) {
+        searchForm.addEventListener('submit', handleSearch);
+    }
+    
+    // Question card options
+    bindCardOptions();
+    
+    // Error retry
+    const errorRetryBtn = document.getElementById('errorRetryBtn');
+    if (errorRetryBtn) {
+        errorRetryBtn.addEventListener('click', hideError);
+    }
+}
+
+function bindCardOptions() {
+    document.querySelectorAll('.question-card').forEach(card => {
+        const buttons = card.querySelectorAll('.option-btn, .skip-btn');
+        buttons.forEach(button => {
+            button.addEventListener('click', function() {
+                const question = card.dataset.question;
+                const value = this.dataset.value;
+                answerQuestion(question, value);
+            });
+        });
+    });
+}
+
+// State Management
+function hideAllStates() {
+    if (welcomeState) welcomeState.classList.add('hidden');
+    if (cardDeckState) cardDeckState.classList.add('hidden');
+    if (searchState) searchState.classList.add('hidden');
+    if (resultsState) resultsState.classList.add('hidden');
+}
+
+function showWelcomeState() {
+    hideAllStates();
+    if (welcomeState) welcomeState.classList.remove('hidden');
+    if (showFinderPanel) {
+        showFinderPanel.classList.remove('flipped');
+        showFinderPanel.classList.remove('slide-left');
+    }
+}
+
+function showSearchState() {
+    hideAllStates();
+    if (searchState) searchState.classList.remove('hidden');
+    if (showFinderPanel) {
+        showFinderPanel.classList.add('flipped');
+        showFinderPanel.classList.remove('slide-left');
+    }
+}
+
+function showResultsState() {
+    hideAllStates();
+    if (resultsState) resultsState.classList.remove('hidden');
+    if (showFinderPanel) showFinderPanel.classList.remove('flipped');
+}
+
+function showCardDeck() {
+    hideAllStates();
+    if (cardDeckState) cardDeckState.classList.remove('hidden');
+    if (showFinderPanel) {
+        showFinderPanel.classList.remove('flipped');
+        showFinderPanel.classList.remove('slide-left');
+    }
+    resetCardDeck();
+}
+
+function hideResultsPanel() {
+    if (resultsPanel) resultsPanel.classList.remove('visible');
+    if (showFinderPanel) showFinderPanel.classList.remove('slide-left');
+}
+
+function showResultsPanel() {
+    if (resultsPanel) resultsPanel.classList.add('visible');
+    if (showFinderPanel) showFinderPanel.classList.add('slide-left');
+}
+
+// Card Deck Functions
+function startCardDeck() {
+    userPreferences = {}; // Reset preferences
+    showCardDeck();
+    updateProgress();
+}
+
+function resetCardDeck() {
+    currentQuestionIndex = 0;
+    document.querySelectorAll('.question-card').forEach((card, index) => {
+        card.classList.remove('active', 'answered', 'slide-down', 'slide-up');
+        if (index === 0) {
+            card.classList.add('active');
+        }
+    });
+    updateProgress();
+}
+
+function answerQuestion(questionType, value) {
+    userPreferences[questionType] = value;
+    
+    const currentCard = document.querySelector('.question-card.active');
+    if (currentCard) {
+        currentCard.classList.add('answered');
+    }
+    
+    currentQuestionIndex++;
+    
+    if (currentQuestionIndex < questions.length) {
+        setTimeout(() => {
+            moveToNextCard();
+        }, 300);
+    } else {
+        setTimeout(() => {
+            finishQuestionnaire();
+        }, 500);
+    }
+    
+    updateProgress();
+}
+
+function moveToNextCard() {
+    const currentCard = document.querySelector('.question-card.active');
+    const nextCard = document.querySelector(`[data-question="${questions[currentQuestionIndex]}"]`);
+    
+    if (currentCard) {
+        currentCard.classList.remove('active');
+        currentCard.classList.add('slide-down');
+        
+        // Clean up after animation
+        setTimeout(() => {
+            currentCard.classList.remove('slide-down');
+        }, 500);
+    }
+    
+    if (nextCard) {
+        nextCard.classList.add('active', 'slide-up');
+        
+        setTimeout(() => {
+            nextCard.classList.remove('slide-up');
+        }, 300);
+    }
+}
+
+function updateProgress() {
+    const progressFill = document.getElementById('progressFill');
+    if (progressFill) {
+        const progress = (currentQuestionIndex / questions.length) * 100;
+        progressFill.style.width = progress + '%';
+    }
+}
+
+function finishQuestionnaire() {
+    findShowsWithPreferences();
+}
+
+function startAgain() {
+    resetAppState();
+    showWelcomeState();
+}
+
+// Show Finding Logic
+async function findShowsWithPreferences() {
+    showLoading();
+    
+    try {
+        // Get shows data if not cached
+        if (allShows.length === 0) {
+            await loadShowsData();
+        }
+        
+        // Filter shows based on preferences
+        let filteredShows = filterShowsByPreferences(allShows, userPreferences);
+        
+        hideLoading();
+        
+        if (filteredShows.length === 0) {
+            showError('No shows match your preferences. Try different options or use "No preference" for more results.');
+            return;
+        }
+        
+        displayResults(filteredShows, 'finder');
+        
+    } catch (error) {
+        handleApiError(error, 'Show finder');
+    }
+}
+
+async function loadShowsData() {
+    const maxPages = 10; // Increased for better variety
+    const promises = [];
+    
+    for (let page = 0; page < maxPages; page++) {
+        promises.push(
+            axios.get('https://api.tvmaze.com/shows', { 
+                params: { page },
+                timeout: 15000
+            })
+            .catch(err => {
+                console.warn(`Failed to load page ${page}:`, err);
+                return { data: [] };
+            })
+        );
+    }
+    
+    const responses = await Promise.all(promises);
+    allShows = responses.flatMap(response => response.data);
+    
+    if (allShows.length === 0) {
+        throw new Error('Unable to load show database');
+    }
+    
+    console.log(`Loaded ${allShows.length} shows for filtering`);
+}
+
+function filterShowsByPreferences(shows, preferences) {
+    let filtered = [...shows];
+    
+    console.log('Starting with', filtered.length, 'shows');
+    console.log('User preferences:', preferences);
+    
+    // Language filter
+    if (preferences.language) {
+        filtered = filtered.filter(show => show.language === preferences.language);
+        console.log(`After language filter (${preferences.language}):`, filtered.length, 'shows');
+    }
+    
+    // Genre filter
+    if (preferences.genre) {
+        filtered = filtered.filter(show => 
+            show.genres && show.genres.includes(preferences.genre)
+        );
+        console.log(`After genre filter (${preferences.genre}):`, filtered.length, 'shows');
+    }
+    
+    // Type filter
+    if (preferences.type) {
+        filtered = filtered.filter(show => show.type === preferences.type);
+        console.log(`After type filter (${preferences.type}):`, filtered.length, 'shows');
+    }
+    
+    // Rating filter
+    if (preferences.rating) {
+        const minRating = parseFloat(preferences.rating);
+        filtered = filtered.filter(show => 
+            show.rating && show.rating.average && show.rating.average >= minRating
+        );
+        console.log(`After rating filter (${minRating}+):`, filtered.length, 'shows');
+    }
+    
+    // Status filter
+    if (preferences.status) {
+        filtered = filtered.filter(show => show.status === preferences.status);
+        console.log(`After status filter (${preferences.status}):`, filtered.length, 'shows');
+    }
+    
+    return filtered;
+}
+
+// Search Functionality
+async function handleSearch(e) {
+    e.preventDefault();
+    
+    const query = document.getElementById('searchInput').value.trim();
+    
+    if (!query) {
+        showError('Please enter a show name');
+        return;
+    }
+    
+    if (query.length < 2) {
+        showError('Search query must be at least 2 characters long');
+        return;
+    }
+
+    showLoading();
+
+    try {
+        const response = await axios.get('https://api.tvmaze.com/search/shows', {
+            params: { q: query },
+            timeout: 10000
+        });
+        
+        hideLoading();
+        
+        if (!response.data || response.data.length === 0) {
+            showError(`No shows found for "${query}". Try different keywords or check spelling.`);
+            return;
+        }
+        
+        displayResults(response.data, 'search');
+        document.getElementById('searchInput').value = '';
+        
+    } catch (error) {
+        handleApiError(error, 'Search');
+    }
+}
+
+// Results Display
+function displayResults(shows, source) {
+    const container = document.getElementById('resultsContainer');
+    const title = document.getElementById('resultsTitle');
+    
+    if (!container || !title) return;
+    
+    // Update title based on source
+    title.textContent = source === 'search' ? 'Search Results' : 'Recommended Shows';
+    
+    // Clear previous results
+    container.innerHTML = '';
+    
+    if (!shows || shows.length === 0) {
+        container.innerHTML = '<p class="no-results">No shows found matching your criteria.</p>';
+        showResultsState();
+        showResultsPanel();
+        return;
+    }
+
+    // Get random selection if too many results
+    const selectedShows = getRandomSelection(shows, RESULTS_LIMIT);
+
+    selectedShows.forEach(result => {
+        const show = source === 'search' ? (result.show || result) : result;
+        
+        if (!show || !show.name) return;
+
+        const imgSrc = show.image && show.image.medium ? show.image.medium : 'https://placehold.co/210x295';
+        
+        const card = document.createElement('div');
+        card.classList.add('show-card');
+        card.innerHTML = `
+            <img src="${imgSrc}" alt="${show.name}" onerror="this.src='https://placehold.co/210x295'">
+            <h3>${show.name}</h3>
+        `;
+        
+        container.appendChild(card);
+    });
+    
+    // Show info message if results were limited
+    if (shows.length > RESULTS_LIMIT) {
+        const infoMessage = document.createElement('p');
+        infoMessage.className = 'results-info';
+        infoMessage.textContent = `Showing ${selectedShows.length} random shows out of ${shows.length} total results.`;
+        container.appendChild(infoMessage);
+    }
+    
+    // Show results state and panel
+    showResultsState();
+    showResultsPanel();
+}
+
+// Utility Functions
+function getRandomSelection(array, limit) {
+    if (array.length <= limit) {
+        return array;
+    }
+    
+    const shuffled = [...array].sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, limit);
+}
+
+function clearResults() {
+    const container = document.getElementById('resultsContainer');
+    if (container) {
+        container.innerHTML = '';
+    }
+}
+
+// Loading and Error States
 function showLoading() {
-    document.getElementById('loading').classList.remove('hidden');
+    const loading = document.getElementById('loading');
+    if (loading) {
+        loading.classList.remove('hidden');
+    }
     hideError();
 }
 
 function hideLoading() {
-    document.getElementById('loading').classList.add('hidden');
+    const loading = document.getElementById('loading');
+    if (loading) {
+        loading.classList.add('hidden');
+    }
 }
 
 function showError(message) {
-    document.getElementById('errorMessage').textContent = message;
-    document.getElementById('error').classList.remove('hidden');
+    const errorContainer = document.getElementById('error');
+    const errorMessage = document.getElementById('errorMessage');
+    
+    if (errorMessage) {
+        errorMessage.textContent = message;
+    }
+    if (errorContainer) {
+        errorContainer.classList.remove('hidden');
+    }
     hideLoading();
 }
 
 function hideError() {
-    document.getElementById('error').classList.add('hidden');
+    const errorContainer = document.getElementById('error');
+    if (errorContainer) {
+        errorContainer.classList.add('hidden');
+    }
 }
 
-function clearResults() {
-    document.getElementById('resultsContainer').innerHTML = '';
-    document.getElementById('resultsTitle').classList.add('hidden');
+function handleApiError(error, context) {
+    console.error(`${context} error:`, error);
+    
+    if (error.response) {
+        const status = error.response.status;
+        switch (status) {
+            case 404:
+                showError(`No results found. Please try a different search term.`);
+                break;
+            case 429:
+                showError(`Too many requests. Please wait a moment and try again.`);
+                break;
+            case 500:
+                showError(`Server error. The TV database is temporarily unavailable.`);
+                break;
+            case 503:
+                showError(`Service temporarily unavailable. Please try again later.`);
+                break;
+            default:
+                showError(`Error ${status}: Unable to fetch data. Please try again.`);
+        }
+    } else if (error.request) {
+        showError(`Network error: Please check your internet connection and try again.`);
+    } else if (error.code === 'ECONNABORTED') {
+        showError(`Request timeout: The server is taking too long to respond. Please try again.`);
+    } else {
+        showError(`Something went wrong: ${error.message}. Please try again.`);
+    }
 }
 
-function showResults() {
-    document.getElementById('resultsTitle').classList.remove('hidden');
-}
-
-// Validation functions
-function validateRuntimeInputs(min, max) {
-    if (min && max && parseInt(min) > parseInt(max)) {
-        return 'Minimum runtime cannot be greater than maximum runtime';
-    }
-    if (min && (parseInt(min) < 0 || parseInt(min) > 500)) {
-        return 'Minimum runtime must be between 0 and 500 minutes';
-    }
-    if (max && (parseInt(max) < 0 || parseInt(max) > 500)) {
-        return 'Maximum runtime must be between 0 and 500 minutes';
-    }
-    return null;
-}
-
-function validateRatingInputs(min, max) {
-    if (min && max && parseFloat(min) > parseFloat(max)) {
-        return 'Minimum rating cannot be greater than maximum rating';
-    }
-    if (min && (parseFloat(min) < 0 || parseFloat(min) > 10)) {
-        return 'Minimum rating must be between 0 and 10';
-    }
-    if (max && (parseFloat(max) < 0 || parseFloat(max) > 10)) {
-        return 'Maximum rating must be between 0 and 10';
-    }
-    return null;
-}
-
-function validateYearInputs(min, max) {
-    const currentYear = new Date().getFullYear();
-    if (min && max && parseInt(min) > parseInt(max)) {
-        return 'From year cannot be greater than to year';
-    }
-    if (min && (parseInt(min) < 1900 || parseInt(min) > currentYear + 10)) {
-        return `From year must be between 1900 and ${currentYear + 10}`;
-    }
-    if (max && (parseInt(max) < 1900 || parseInt(max) > currentYear + 10)) {
-        return `To year must be between 1900 and ${currentYear + 10}`;
-    }
-    return null;
-}
-
+// Validation functions (for future use)
 function validateSearchInput(query) {
     if (!query || query.trim().length === 0) {
         return 'Please enter a show name';
@@ -109,336 +521,19 @@ function validateSearchInput(query) {
     return null;
 }
 
-// Random selection function
-function getRandomSelection(array, limit) {
-    if (array.length <= limit) {
-        return array;
-    }
-    
-    const shuffled = [...array].sort(() => 0.5 - Math.random());
-    return shuffled.slice(0, limit);
-}
-
-// Card creation function
-function makeShowCard(shows, isDirectShow = false) {
-    const container = document.getElementById('resultsContainer');
-    
-    if (!shows || shows.length === 0) {
-        container.innerHTML = '<p>No shows found matching your criteria.</p>';
-        showResults();
-        return;
-    }
-
-    // Randomly select shows if there are more than the limit
-    const selectedShows = getRandomSelection(shows, RESULTS_LIMIT);
-
-    for (let result of selectedShows) {
-        const show = isDirectShow ? result : (result.show || result);
-        
-        if (!show || !show.name) continue;
-
-        const imgSrc = show.image && show.image.medium ? show.image.medium : 'https://placehold.co/210x295';
-        
-        const card = document.createElement('div');
-        card.classList.add('card');
-        card.innerHTML = `
-            <img src="${imgSrc}" alt="${show.name}" onerror="this.src='https://placehold.co/210x295'">
-            <h3>${show.name}</h3>
-        `;
-        
-        container.appendChild(card);
-    }
-    
-    // Show message if results were limited
-    if (shows.length > RESULTS_LIMIT) {
-        const infoMessage = document.createElement('p');
-        infoMessage.style.fontStyle = 'italic';
-        infoMessage.style.textAlign = 'center';
-        infoMessage.style.marginTop = '20px';
-        infoMessage.textContent = `Showing ${selectedShows.length} random shows out of ${shows.length} total results.`;
-        container.appendChild(infoMessage);
-    }
-    
-    showResults();
-}
-
-// Enhanced error handling
-function handleApiError(error, context) {
-    console.error(`${context} error:`, error);
-    
-    if (error.response) {
-        // Server responded with error status
-        const status = error.response.status;
-        switch (status) {
-            case 404:
-                showError(`No results found. Please try a different search term.`);
-                break;
-            case 429:
-                showError(`Too many requests. Please wait a moment and try again.`);
-                break;
-            case 500:
-                showError(`Server error. The TV database is temporarily unavailable.`);
-                break;
-            default:
-                showError(`Error ${status}: Unable to fetch data. Please try again.`);
-        }
-    } else if (error.request) {
-        // Network error
-        showError(`Network error: Please check your internet connection and try again.`);
-    } else {
-        // Other error
-        showError(`Something went wrong. Please try again.`);
-    }
-}
-
-// Section 1: Search Show
-document.getElementById('searchForm').addEventListener('submit', async function(e) {
-    e.preventDefault();
-    clearResults();
-    
-    const query = document.getElementById('searchInput').value.trim();
-    
-    // Validation
-    const validationError = validateSearchInput(query);
-    if (validationError) {
-        showError(validationError);
-        return;
-    }
-
-    showLoading();
-
-    try {
-        const response = await axios.get('https://api.tvmaze.com/search/shows', {
-            params: { q: query },
-            timeout: 10000 // 10 second timeout
-        });
-        
-        hideLoading();
-        
-        if (!response.data || response.data.length === 0) {
-            showError(`No shows found for "${query}". Try different keywords or check spelling.`);
-            return;
-        }
-        
-        makeShowCard(response.data);
-        document.getElementById('searchInput').value = '';
-    } catch (error) {
-        handleApiError(error, 'Search');
-    }
-});
-
-// Section 2: Surprise Me
-document.getElementById('surpriseButton').addEventListener('click', async function() {
-    clearResults();
-    showLoading();
-
-    try {
-        // Get a random page of shows (TVMaze has shows paginated by 250 per page)
-        const randomPage = Math.floor(Math.random() * 50); // Limit to first 50 pages for better show variety
-        const response = await axios.get('https://api.tvmaze.com/shows', {
-            params: { page: randomPage },
-            timeout: 10000
-        });
-
-        if (response.data && response.data.length > 0) {
-            // Pick a random show from the page
-            const randomShow = response.data[Math.floor(Math.random() * response.data.length)];
-            hideLoading();
-            makeShowCard([randomShow], true);
-        } else {
-            throw new Error('No shows found on this page');
-        }
-    } catch (error) {
-        // Fallback: try to get shows from page 0
-        try {
-            const response = await axios.get('https://api.tvmaze.com/shows', {
-                params: { page: 0 },
-                timeout: 10000
-            });
-            if (response.data && response.data.length > 0) {
-                const randomShow = response.data[Math.floor(Math.random() * response.data.length)];
-                hideLoading();
-                makeShowCard([randomShow], true);
-            } else {
-                throw new Error('No shows available');
-            }
-        } catch (fallbackError) {
-            handleApiError(fallbackError, 'Random show');
-        }
-    }
-});
-
-// Section 3: Show Finder
-document.getElementById('finderForm').addEventListener('submit', async function(e) {
-    e.preventDefault();
-    clearResults();
-
-    // Get form values
-    const runtimeMin = document.getElementById('runtimeMin').value;
-    const runtimeMax = document.getElementById('runtimeMax').value;
-    const ratingMin = document.getElementById('ratingMin').value;
-    const ratingMax = document.getElementById('ratingMax').value;
-    const yearMin = document.getElementById('yearMin').value;
-    const yearMax = document.getElementById('yearMax').value;
-
-    // Validate inputs
-    let validationError = validateRuntimeInputs(runtimeMin, runtimeMax);
-    if (validationError) {
-        showError(validationError);
-        return;
-    }
-
-    validationError = validateRatingInputs(ratingMin, ratingMax);
-    if (validationError) {
-        showError(validationError);
-        return;
-    }
-
-    validationError = validateYearInputs(yearMin, yearMax);
-    if (validationError) {
-        showError(validationError);
-        return;
-    }
-
-    showLoading();
-
-    try {
-        // Get shows data (load more pages for better filtering results)
-        if (allShows.length === 0) {
-            const maxPages = 100; // Increased for better variety while keeping reasonable load time
-            const promises = [];
-            
-            for (let page = 0; page < maxPages; page++) {
-                promises.push(
-                    axios.get('https://api.tvmaze.com/shows', { 
-                        params: { page },
-                        timeout: 15000 // Increased timeout for multiple requests
-                    })
-                    .catch(err => {
-                        console.warn(`Failed to load page ${page}:`, err);
-                        return { data: [] };
-                    })
-                );
-            }
-            
-            const responses = await Promise.all(promises);
-            allShows = responses.flatMap(response => response.data);
-            
-            if (allShows.length === 0) {
-                throw new Error('Unable to load show database');
-            }
-        }
-
-        // Apply filters
-        let filteredShows = [...allShows];
-
-        // Genre filter
-        const genre = document.getElementById('genreFilter').value;
-        if (genre) {
-            filteredShows = filteredShows.filter(show => 
-                show.genres && show.genres.includes(genre)
-            );
-        }
-
-        // Language filter
-        const language = document.getElementById('languageFilter').value;
-        if (language) {
-            filteredShows = filteredShows.filter(show => 
-                show.language === language
-            );
-        }
-
-        // Status filter
-        const status = document.getElementById('statusFilter').value;
-        if (status) {
-            filteredShows = filteredShows.filter(show => 
-                show.status === status
-            );
-        }
-
-        // Type filter
-        const type = document.getElementById('typeFilter').value;
-        if (type) {
-            filteredShows = filteredShows.filter(show => 
-                show.type === type
-            );
-        }
-
-        // Runtime filters
-        if (runtimeMin) {
-            filteredShows = filteredShows.filter(show => 
-                show.runtime && show.runtime >= parseInt(runtimeMin)
-            );
-        }
-        if (runtimeMax) {
-            filteredShows = filteredShows.filter(show => 
-                show.runtime && show.runtime <= parseInt(runtimeMax)
-            );
-        }
-
-        // Rating filters
-        if (ratingMin) {
-            filteredShows = filteredShows.filter(show => 
-                show.rating && show.rating.average && show.rating.average >= parseFloat(ratingMin)
-            );
-        }
-        if (ratingMax) {
-            filteredShows = filteredShows.filter(show => 
-                show.rating && show.rating.average && show.rating.average <= parseFloat(ratingMax)
-            );
-        }
-
-        // Year filters
-        if (yearMin) {
-            filteredShows = filteredShows.filter(show => {
-                if (!show.premiered) return false;
-                const year = new Date(show.premiered).getFullYear();
-                return year >= parseInt(yearMin);
-            });
-        }
-        if (yearMax) {
-            filteredShows = filteredShows.filter(show => {
-                if (!show.premiered) return false;
-                const year = new Date(show.premiered).getFullYear();
-                return year <= parseInt(yearMax);
-            });
-        }
-
-        hideLoading();
-
-        if (filteredShows.length === 0) {
-            showError('No shows match your criteria. Try adjusting your filters.');
-            return;
-        }
-
-        makeShowCard(filteredShows, true);
-
-    } catch (error) {
-        handleApiError(error, 'Show finder');
-    }
-});
-
-// Clear filters function
-function clearFilters() {
-    document.getElementById('finderForm').reset();
-    clearResults();
-}
-
-// Initialize - show search section by default
-window.addEventListener('load', function() {
-    // Hide all sections first
-    document.querySelectorAll('.section-container').forEach(section => {
-        section.classList.add('hidden');
+// Debug helpers
+function logAppState() {
+    console.log('Current app state:', {
+        currentQuestionIndex,
+        userPreferences,
+        totalShows: allShows.length,
+        welcomeVisible: !welcomeState?.classList.contains('hidden'),
+        cardDeckVisible: !cardDeckState?.classList.contains('hidden'),
+        searchVisible: !searchState?.classList.contains('hidden'),
+        resultsVisible: !resultsState?.classList.contains('hidden'),
+        resultsPanel: resultsPanel?.classList.contains('visible')
     });
-    
-    // Remove active class from all nav buttons
-    document.querySelectorAll('.nav-btn').forEach(btn => {
-        btn.classList.remove('active');
-    });
-    
-    // Show search section and make its button active
-    document.getElementById('search').classList.remove('hidden');
-    document.querySelector('button[onclick="showSection(\'search\')"]').classList.add('active');
-    
-    currentSection = 'search';
-});
+}
+
+// Expose debug function globally
+window.logAppState = logAppState;
