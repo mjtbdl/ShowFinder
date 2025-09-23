@@ -5,150 +5,223 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ShowFinder - Discover Your Next Show</title>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="styles.css">
 </head>
-<body>
-    <header>
-        <h1>ShowFinder - Discover Your Next Show</h1>
+<body class="bg-primary-dark text-primary-light min-h-screen">
+    <!-- Header -->
+    <header class="bg-gradient-to-r from-primary-dark via-secondary-dark to-teal-main py-8 px-4">
+        <div class="container mx-auto text-center">
+            <h1 class="text-4xl md:text-6xl font-bold text-accent-light mb-2">ShowFinder</h1>
+            <p class="text-lg md:text-xl text-teal-light">Discover Your Next Binge-Worthy Show</p>
+        </div>
     </header>
 
     <!-- Navigation -->
-    <nav id="navigation">
-        <button onclick="showSection('search')">Search Show</button>
-        <button onclick="showSection('surprise')">Surprise Me</button>
-        <button onclick="showSection('finder')">Show Finder</button>
+    <nav class="bg-secondary-dark/80 backdrop-blur-md sticky top-0 z-50 border-b border-teal-main/20">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex flex-wrap justify-center gap-4">
+                <button onclick="showSection('search')" class="nav-btn">
+                    <span>🔍</span> Search Show
+                </button>
+                <button onclick="showSection('surprise')" class="nav-btn">
+                    <span>🎲</span> Surprise Me
+                </button>
+                <button onclick="showSection('finder')" class="nav-btn">
+                    <span>🎯</span> Show Finder
+                </button>
+            </div>
+        </div>
     </nav>
 
-    <main>
+    <main class="container mx-auto px-4 py-8">
         <!-- Section 1: Search Show -->
-        <section id="search" class="section">
-            <h2>Search for a Specific Show</h2>
-            <form id="searchForm">
-                <input type="text" id="searchInput" placeholder="Enter show name..." required>
-                <button type="submit">Search</button>
+        <section id="search" class="section-container">
+            <div class="section-header">
+                <h2 class="section-title">Search for a Specific Show</h2>
+                <p class="section-subtitle">Find exactly what you're looking for</p>
+            </div>
+            
+            <form id="searchForm" class="search-form">
+                <div class="search-input-container">
+                    <input type="text" id="searchInput" placeholder="Enter show name..." required class="search-input">
+                    <button type="submit" class="search-btn">
+                        <span>🚀</span> Search
+                    </button>
+                </div>
             </form>
         </section>
 
         <!-- Section 2: Surprise Me -->
-        <section id="surprise" class="section hidden">
-            <h2>Surprise Me!</h2>
-            <p>Get a random show recommendation</p>
-            <button id="surpriseButton">Give Me a Random Show</button>
+        <section id="surprise" class="section-container hidden">
+            <div class="section-header">
+                <h2 class="section-title">Surprise Me!</h2>
+                <p class="section-subtitle">Let us pick something amazing for you</p>
+            </div>
+            
+            <div class="text-center">
+                <button id="surpriseButton" class="surprise-btn">
+                    <span class="text-2xl">🎯</span>
+                    <span>Give Me a Random Show</span>
+                </button>
+            </div>
         </section>
 
         <!-- Section 3: Show Finder -->
-        <section id="finder" class="section hidden">
-            <h2>Show Finder - Discover Based on Your Preferences</h2>
-            <form id="finderForm">
-                <div class="filter-group">
-                    <label for="genreFilter">Genre:</label>
-                    <select id="genreFilter">
-                        <option value="">Any Genre</option>
-                        <option value="Drama">Drama</option>
-                        <option value="Comedy">Comedy</option>
-                        <option value="Action">Action</option>
-                        <option value="Adventure">Adventure</option>
-                        <option value="Anime">Anime</option>
-                        <option value="Children">Children</option>
-                        <option value="Crime">Crime</option>
-                        <option value="Documentary">Documentary</option>
-                        <option value="Family">Family</option>
-                        <option value="Fantasy">Fantasy</option>
-                        <option value="History">History</option>
-                        <option value="Horror">Horror</option>
-                        <option value="Music">Music</option>
-                        <option value="Mystery">Mystery</option>
-                        <option value="Romance">Romance</option>
-                        <option value="Science-Fiction">Science-Fiction</option>
-                        <option value="Thriller">Thriller</option>
-                        <option value="War">War</option>
-                        <option value="Western">Western</option>
-                    </select>
+        <section id="finder" class="section-container hidden">
+            <div class="section-header">
+                <h2 class="section-title">Show Finder</h2>
+                <p class="section-subtitle">Answer a few questions to discover your perfect show</p>
+            </div>
+            
+            <form id="finderForm" class="finder-form">
+                <div class="filters-grid">
+                    <div class="filter-group">
+                        <label for="genreFilter" class="filter-label">Genre</label>
+                        <select id="genreFilter" class="filter-select" name="Show[genre]">
+                            <option value=""></option>
+                            <option value="Action">Action</option>
+                            <option value="Adult">Adult</option>
+                            <option value="Adventure">Adventure</option>
+                            <option value="Anime">Anime</option>
+                            <option value="Children">Children</option>
+                            <option value="Comedy">Comedy</option>
+                            <option value="Crime">Crime</option>
+                            <option value="DIY">DIY</option>
+                            <option value="Drama">Drama</option>
+                            <option value="Espionage">Espionage</option>
+                            <option value="Family">Family</option>
+                            <option value="Fantasy">Fantasy</option>
+                            <option value="Food">Food</option>
+                            <option value="History">History</option>
+                            <option value="Horror">Horror</option>
+                            <option value="Legal">Legal</option>
+                            <option value="Medical">Medical</option>
+                            <option value="Music">Music</option>
+                            <option value="Mystery">Mystery</option>
+                            <option value="Nature">Nature</option>
+                            <option value="Romance">Romance</option>
+                            <option value="Science-Fiction">Science-Fiction</option>
+                            <option value="Sports">Sports</option>
+                            <option value="Supernatural">Supernatural</option>
+                            <option value="Thriller">Thriller</option>
+                            <option value="Travel">Travel</option>
+                            <option value="War">War</option>
+                            <option value="Western">Western</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="languageFilter" class="filter-label">Language</label>
+                        <select id="languageFilter" class="filter-select" name="Show[language_enum]">
+                            <option value=""></option>
+                            <option value="Chinese">Chinese</option>
+                            <option value="Czech">Czech</option>
+                            <option value="Danish">Danish</option>
+                            <option value="Dutch">Dutch</option>
+                            <option value="English">English</option>
+                            <option value="French">French</option>
+                            <option value="German">German</option>
+                            <option value="Hebrew">Hebrew</option>
+                            <option value="Hindi">Hindi</option>
+                            <option value="Hungarian">Hungarian</option>
+                            <option value="Italian">Italian</option>
+                            <option value="Japanese">Japanese</option>
+                            <option value="Korean">Korean</option>
+                            <option value="Norwegian">Norwegian</option>
+                            <option value="Polish">Polish</option>
+                            <option value="Portuguese">Portuguese</option>
+                            <option value="Russian">Russian</option>
+                            <option value="Spanish">Spanish</option>
+                            <option value="Swedish">Swedish</option>
+                            <option value="Thai">Thai</option>
+                            <option value="Turkish">Turkish</option>
+                            <option value="Ukrainian">Ukrainian</option>
+                            <option value="Scottish Gaelic">Scottish Gaelic</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="statusFilter" class="filter-label">Status</label>
+                        <select id="statusFilter" class="filter-select">
+                            <option value="">Any Status</option>
+                            <option value="Running">Currently Running</option>
+                            <option value="Ended">Ended</option>
+                            <option value="To Be Determined">TBD</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="typeFilter" class="filter-label">Show Type</label>
+                        <select id="typeFilter" class="filter-select">
+                            <option value="">Any Type</option>
+                            <option value="Scripted">Scripted</option>
+                            <option value="Animation">Animation</option>
+                            <option value="Reality">Reality</option>
+                            <option value="Talk Show">Talk Show</option>
+                            <option value="Documentary">Documentary</option>
+                            <option value="Game Show">Game Show</option>
+                            <option value="Variety">Variety</option>
+                            <option value="News">News</option>
+                            <option value="Sports">Sports</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label class="filter-label">Runtime (minutes)</label>
+                        <div class="range-inputs">
+                            <input type="number" id="runtimeMin" placeholder="Min" min="0" max="500" class="filter-input">
+                            <span class="range-separator">to</span>
+                            <input type="number" id="runtimeMax" placeholder="Max" min="0" max="500" class="filter-input">
+                        </div>
+                    </div>
+
+                    <div class="filter-group">
+                        <label class="filter-label">Rating (0-10)</label>
+                        <div class="range-inputs">
+                            <input type="number" id="ratingMin" placeholder="Min" min="0" max="10" step="0.1" class="filter-input">
+                            <span class="range-separator">to</span>
+                            <input type="number" id="ratingMax" placeholder="Max" min="0" max="10" step="0.1" class="filter-input">
+                        </div>
+                    </div>
+
+                    <div class="filter-group">
+                        <label class="filter-label">Year</label>
+                        <div class="range-inputs">
+                            <input type="number" id="yearMin" placeholder="From" min="1900" max="2030" class="filter-input">
+                            <span class="range-separator">to</span>
+                            <input type="number" id="yearMax" placeholder="To" min="1900" max="2030" class="filter-input">
+                        </div>
+                    </div>
                 </div>
 
-                <div class="filter-group">
-                    <label for="languageFilter">Language:</label>
-                    <select id="languageFilter">
-                        <option value="">Any Language</option>
-                        <option value="English">English</option>
-                        <option value="Spanish">Spanish</option>
-                        <option value="French">French</option>
-                        <option value="German">German</option>
-                        <option value="Italian">Italian</option>
-                        <option value="Japanese">Japanese</option>
-                        <option value="Korean">Korean</option>
-                        <option value="Portuguese">Portuguese</option>
-                        <option value="Russian">Russian</option>
-                        <option value="Chinese">Chinese</option>
-                    </select>
+                <div class="form-actions">
+                    <button type="submit" class="primary-btn">
+                        <span>🎯</span> Find Shows
+                    </button>
+                    <button type="button" onclick="clearFilters()" class="secondary-btn">
+                        <span>🗑️</span> Clear Filters
+                    </button>
                 </div>
-
-                <div class="filter-group">
-                    <label for="statusFilter">Status:</label>
-                    <select id="statusFilter">
-                        <option value="">Any Status</option>
-                        <option value="Running">Currently Running</option>
-                        <option value="Ended">Ended</option>
-                        <option value="To Be Determined">TBD</option>
-                        <option value="In Development">In Development</option>
-                    </select>
-                </div>
-
-                <div class="filter-group">
-                    <label for="typeFilter">Show Type:</label>
-                    <select id="typeFilter">
-                        <option value="">Any Type</option>
-                        <option value="Scripted">Scripted</option>
-                        <option value="Animation">Animation</option>
-                        <option value="Reality">Reality</option>
-                        <option value="Talk Show">Talk Show</option>
-                        <option value="Documentary">Documentary</option>
-                        <option value="Game Show">Game Show</option>
-                        <option value="Variety">Variety</option>
-                        <option value="News">News</option>
-                        <option value="Sports">Sports</option>
-                    </select>
-                </div>
-
-                <div class="filter-group">
-                    <label for="runtimeMin">Min Runtime:</label>
-                    <input type="number" id="runtimeMin" placeholder="minutes" min="0" max="500">
-                    <label for="runtimeMax">Max Runtime:</label>
-                    <input type="number" id="runtimeMax" placeholder="minutes" min="0" max="500">
-                </div>
-
-                <div class="filter-group">
-                    <label for="ratingMin">Min Rating:</label>
-                    <input type="number" id="ratingMin" placeholder="0-10" min="0" max="10" step="0.1">
-                    <label for="ratingMax">Max Rating:</label>
-                    <input type="number" id="ratingMax" placeholder="0-10" min="0" max="10" step="0.1">
-                </div>
-
-                <div class="filter-group">
-                    <label for="yearMin">From Year:</label>
-                    <input type="number" id="yearMin" placeholder="e.g., 2000" min="1900" max="2030">
-                    <label for="yearMax">To Year:</label>
-                    <input type="number" id="yearMax" placeholder="e.g., 2024" min="1900" max="2030">
-                </div>
-
-                <button type="submit">Find Shows</button>
-                <button type="button" onclick="clearFilters()">Clear All Filters</button>
             </form>
         </section>
 
-        <!-- Loading and Error Messages -->
-        <div id="loading" class="loading hidden">
-            <p>Loading...</p>
+        <!-- Loading State -->
+        <div id="loading" class="loading-container hidden">
+            <div class="loading-spinner"></div>
+            <p class="loading-text">Discovering amazing shows for you...</p>
         </div>
 
-        <div id="error" class="error hidden">
-            <p id="errorMessage"></p>
+        <!-- Error State -->
+        <div id="error" class="error-container hidden">
+            <div class="error-icon">⚠️</div>
+            <p id="errorMessage" class="error-message"></p>
         </div>
 
         <!-- Results Section -->
-        <section id="results">
-            <h2 id="resultsTitle" class="hidden">Results</h2>
-            <div id="resultsContainer"></div>
+        <section id="results" class="results-section">
+            <h2 id="resultsTitle" class="results-title hidden">Results</h2>
+            <div id="resultsContainer" class="results-grid"></div>
         </section>
     </main>
 

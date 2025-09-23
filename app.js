@@ -5,12 +5,21 @@ const RESULTS_LIMIT = 10; // Maximum results to show
 // Navigation functions
 function showSection(sectionName) {
     // Hide all sections
-    document.querySelectorAll('.section').forEach(section => {
+    document.querySelectorAll('.section-container').forEach(section => {
         section.classList.add('hidden');
+    });
+    
+    // Remove active class from all nav buttons
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.classList.remove('active');
     });
     
     // Show selected section
     document.getElementById(sectionName).classList.remove('hidden');
+    
+    // Add active class to clicked button
+    event.target.classList.add('active');
+    
     currentSection = sectionName;
     
     // Clear previous results
@@ -296,7 +305,7 @@ document.getElementById('finderForm').addEventListener('submit', async function(
     try {
         // Get shows data (load more pages for better filtering results)
         if (allShows.length === 0) {
-            const maxPages = 8; // Increased for better variety while keeping reasonable load time
+            const maxPages = 100; // Increased for better variety while keeping reasonable load time
             const promises = [];
             
             for (let page = 0; page < maxPages; page++) {
@@ -417,5 +426,19 @@ function clearFilters() {
 
 // Initialize - show search section by default
 window.addEventListener('load', function() {
-    showSection('search');
+    // Hide all sections first
+    document.querySelectorAll('.section-container').forEach(section => {
+        section.classList.add('hidden');
+    });
+    
+    // Remove active class from all nav buttons
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    
+    // Show search section and make its button active
+    document.getElementById('search').classList.remove('hidden');
+    document.querySelector('button[onclick="showSection(\'search\')"]').classList.add('active');
+    
+    currentSection = 'search';
 });
