@@ -5,19 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ShowFinder - Discover Your Next Show</title>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-    <style>
-        .section { margin: 2rem 0; padding: 1rem; border: 1px solid #ccc; }
-        .card { display: inline-block; width: 210px; margin: 1rem; vertical-align: top; }
-        .card img { width: 100%; height: auto; }
-        .loading { text-align: center; padding: 2rem; }
-        .error { color: red; padding: 1rem; }
-        .filter-group { margin: 1rem 0; }
-        .filter-group label { display: inline-block; width: 120px; }
-        .filter-group input, .filter-group select { margin: 0.2rem; }
-        .hidden { display: none; }
-        button { margin: 0.5rem; padding: 0.5rem 1rem; cursor: pointer; }
-        #navigation button { margin-right: 1rem; padding: 1rem 2rem; font-size: 1.1rem; }
-    </style>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <header>
@@ -27,7 +15,6 @@
     <!-- Navigation -->
     <nav id="navigation">
         <button onclick="showSection('search')">Search Show</button>
-        <button onclick="showSection('actor')">Search Actor</button>
         <button onclick="showSection('surprise')">Surprise Me</button>
         <button onclick="showSection('finder')">Show Finder</button>
     </nav>
@@ -42,23 +29,14 @@
             </form>
         </section>
 
-        <!-- Section 2: Search Actor -->
-        <section id="actor" class="section hidden">
-            <h2>Find Shows by Actor</h2>
-            <form id="actorForm">
-                <input type="text" id="actorInput" placeholder="Enter actor name..." required>
-                <button type="submit">Search Actor</button>
-            </form>
-        </section>
-
-        <!-- Section 3: Surprise Me -->
+        <!-- Section 2: Surprise Me -->
         <section id="surprise" class="section hidden">
             <h2>Surprise Me!</h2>
             <p>Get a random show recommendation</p>
             <button id="surpriseButton">Give Me a Random Show</button>
         </section>
 
-        <!-- Section 4: Show Finder -->
+        <!-- Section 3: Show Finder -->
         <section id="finder" class="section hidden">
             <h2>Show Finder - Discover Based on Your Preferences</h2>
             <form id="finderForm">
@@ -134,9 +112,9 @@
 
                 <div class="filter-group">
                     <label for="runtimeMin">Min Runtime:</label>
-                    <input type="number" id="runtimeMin" placeholder="minutes" min="0">
+                    <input type="number" id="runtimeMin" placeholder="minutes" min="0" max="500">
                     <label for="runtimeMax">Max Runtime:</label>
-                    <input type="number" id="runtimeMax" placeholder="minutes" min="0">
+                    <input type="number" id="runtimeMax" placeholder="minutes" min="0" max="500">
                 </div>
 
                 <div class="filter-group">
@@ -174,326 +152,6 @@
         </section>
     </main>
 
-    <script>
-        let allShows = []; // Cache for all shows when needed
-        let currentSection = 'search';
-
-        // Navigation functions
-        function showSection(sectionName) {
-            // Hide all sections
-            document.querySelectorAll('.section').forEach(section => {
-                section.classList.add('hidden');
-            });
-            
-            // Show selected section
-            document.getElementById(sectionName).classList.remove('hidden');
-            currentSection = sectionName;
-            
-            // Clear previous results
-            clearResults();
-        }
-
-        // Utility functions
-        function showLoading() {
-            document.getElementById('loading').classList.remove('hidden');
-            hideError();
-        }
-
-        function hideLoading() {
-            document.getElementById('loading').classList.add('hidden');
-        }
-
-        function showError(message) {
-            document.getElementById('errorMessage').textContent = message;
-            document.getElementById('error').classList.remove('hidden');
-            hideLoading();
-        }
-
-        function hideError() {
-            document.getElementById('error').classList.add('hidden');
-        }
-
-        function clearResults() {
-            document.getElementById('resultsContainer').innerHTML = '';
-            document.getElementById('resultsTitle').classList.add('hidden');
-        }
-
-        function showResults() {
-            document.getElementById('resultsTitle').classList.remove('hidden');
-        }
-
-        // Card creation function
-        function makeShowCard(shows, isActorSearch = false) {
-            const container = document.getElementById('resultsContainer');
-            
-            if (!shows || shows.length === 0) {
-                container.innerHTML = '<p>No shows found matching your criteria.</p>';
-                showResults();
-                return;
-            }
-
-            for (let result of shows) {
-                const show = isActorSearch ? result : (result.show || result);
-                
-                if (!show || !show.name) continue;
-
-                const imgSrc = show.image && show.image.medium ? show.image.medium : 'https://placehold.co/210x295';
-                
-                const card = document.createElement('div');
-                card.classList.add('card');
-                card.innerHTML = `
-                    <img src="${imgSrc}" alt="${show.name}" onerror="this.src='https://placehold.co/210x295'">
-                    <h3>${show.name}</h3>
-                `;
-                
-                container.appendChild(card);
-            }
-            
-            showResults();
-        }
-
-        // Section 1: Search Show
-        document.getElementById('searchForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            clearResults();
-            showLoading();
-            
-            const query = document.getElementById('searchInput').value.trim();
-            
-            if (!query) {
-                showError('Please enter a show name');
-                return;
-            }
-
-            try {
-                const response = await axios.get('https://api.tvmaze.com/search/shows', {
-                    params: { q: query }
-                });
-                
-                hideLoading();
-                makeShowCard(response.data);
-                document.getElementById('searchInput').value = '';
-            } catch (error) {
-                showError('Error searching for shows. Please try again.');
-                console.error('Search error:', error);
-            }
-        });
-
-        // Section 2: Search Actor
-        document.getElementById('actorForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            clearResults();
-            showLoading();
-            
-            const actorName = document.getElementById('actorInput').value.trim();
-            
-            if (!actorName) {
-                showError('Please enter an actor name');
-                return;
-            }
-
-            try {
-                // First search for the actor
-                const actorResponse = await axios.get('https://api.tvmaze.com/search/people', {
-                    params: { q: actorName }
-                });
-
-                if (!actorResponse.data || actorResponse.data.length === 0) {
-                    hideLoading();
-                    showError('Actor not found. Please try a different name.');
-                    return;
-                }
-
-                // Get the first actor's ID
-                const actorId = actorResponse.data[0].person.id;
-                
-                // Get shows for this actor (embed show objects so we can render cards)
-                const showsResponse = await axios.get(`https://api.tvmaze.com/people/${actorId}/castcredits`, {
-                    params: { embed: 'show' }
-                });
-                
-                // Extract unique shows
-                const uniqueShows = [];
-                const seenShows = new Set();
-                
-                for (let credit of showsResponse.data) {
-                    if (credit._embedded && credit._embedded.show && !seenShows.has(credit._embedded.show.id)) {
-                        uniqueShows.push(credit._embedded.show);
-                        seenShows.add(credit._embedded.show.id);
-                    }
-                }
-                
-                hideLoading();
-                makeShowCard(uniqueShows, true);
-                document.getElementById('actorInput').value = '';
-            } catch (error) {
-                showError('Error searching for actor shows. Please try again.');
-                console.error('Actor search error:', error);
-            }
-        });
-
-        // Section 3: Surprise Me
-        document.getElementById('surpriseButton').addEventListener('click', async function() {
-            clearResults();
-            showLoading();
-
-            try {
-                // Get a random page of shows
-                const randomPage = Math.floor(Math.random() * 100);
-                const response = await axios.get('https://api.tvmaze.com/shows', {
-                    params: { page: randomPage }
-                });
-
-                if (response.data && response.data.length > 0) {
-                    // Pick a random show from the page
-                    const randomShow = response.data[Math.floor(Math.random() * response.data.length)];
-                    hideLoading();
-                    makeShowCard([randomShow], true);
-                } else {
-                    throw new Error('No shows found');
-                }
-            } catch (error) {
-                // Fallback: try to get shows without pagination
-                try {
-                    const response = await axios.get('https://api.tvmaze.com/shows');
-                    const randomShow = response.data[Math.floor(Math.random() * Math.min(100, response.data.length))];
-                    hideLoading();
-                    makeShowCard([randomShow], true);
-                } catch (fallbackError) {
-                    showError('Error getting random show. Please try again.');
-                    console.error('Surprise me error:', fallbackError);
-                }
-            }
-        });
-
-        // Section 4: Show Finder
-        document.getElementById('finderForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            clearResults();
-            showLoading();
-
-            try {
-                // Get all shows first (we'll filter client-side since TVMaze API has limited filtering)
-                if (allShows.length === 0) {
-                    // Load shows in batches
-                    const maxPages = 5; // Limit to prevent too many requests
-                    const promises = [];
-                    
-                    for (let page = 0; page < maxPages; page++) {
-                        promises.push(
-                            axios.get('https://api.tvmaze.com/shows', { params: { page } })
-                            .catch(() => ({ data: [] })) // Handle failed pages gracefully
-                        );
-                    }
-                    
-                    const responses = await Promise.all(promises);
-                    allShows = responses.flatMap(response => response.data);
-                }
-
-                // Apply filters
-                let filteredShows = [...allShows];
-
-                // Genre filter
-                const genre = document.getElementById('genreFilter').value;
-                if (genre) {
-                    filteredShows = filteredShows.filter(show => 
-                        show.genres && show.genres.includes(genre)
-                    );
-                }
-
-                // Language filter
-                const language = document.getElementById('languageFilter').value;
-                if (language) {
-                    filteredShows = filteredShows.filter(show => 
-                        show.language === language
-                    );
-                }
-
-                // Status filter
-                const status = document.getElementById('statusFilter').value;
-                if (status) {
-                    filteredShows = filteredShows.filter(show => 
-                        show.status === status
-                    );
-                }
-
-                // Type filter
-                const type = document.getElementById('typeFilter').value;
-                if (type) {
-                    filteredShows = filteredShows.filter(show => 
-                        show.type === type
-                    );
-                }
-
-                // Runtime filters
-                const runtimeMin = document.getElementById('runtimeMin').value;
-                const runtimeMax = document.getElementById('runtimeMax').value;
-                if (runtimeMin) {
-                    filteredShows = filteredShows.filter(show => 
-                        show.runtime && show.runtime >= parseInt(runtimeMin)
-                    );
-                }
-                if (runtimeMax) {
-                    filteredShows = filteredShows.filter(show => 
-                        show.runtime && show.runtime <= parseInt(runtimeMax)
-                    );
-                }
-
-                // Rating filters
-                const ratingMin = document.getElementById('ratingMin').value;
-                const ratingMax = document.getElementById('ratingMax').value;
-                if (ratingMin) {
-                    filteredShows = filteredShows.filter(show => 
-                        show.rating && show.rating.average && show.rating.average >= parseFloat(ratingMin)
-                    );
-                }
-                if (ratingMax) {
-                    filteredShows = filteredShows.filter(show => 
-                        show.rating && show.rating.average && show.rating.average <= parseFloat(ratingMax)
-                    );
-                }
-
-                // Year filters
-                const yearMin = document.getElementById('yearMin').value;
-                const yearMax = document.getElementById('yearMax').value;
-                if (yearMin) {
-                    filteredShows = filteredShows.filter(show => {
-                        if (!show.premiered) return false;
-                        const year = new Date(show.premiered).getFullYear();
-                        return year >= parseInt(yearMin);
-                    });
-                }
-                if (yearMax) {
-                    filteredShows = filteredShows.filter(show => {
-                        if (!show.premiered) return false;
-                        const year = new Date(show.premiered).getFullYear();
-                        return year <= parseInt(yearMax);
-                    });
-                }
-
-                // Limit results to prevent overwhelming UI
-                if (filteredShows.length > 50) {
-                    filteredShows = filteredShows.slice(0, 50);
-                }
-
-                hideLoading();
-                makeShowCard(filteredShows, true);
-
-            } catch (error) {
-                showError('Error finding shows. Please try again.');
-                console.error('Finder error:', error);
-            }
-        });
-
-        // Clear filters function
-        function clearFilters() {
-            document.getElementById('finderForm').reset();
-        }
-
-        // Initialize - show search section by default
-        window.addEventListener('load', function() {
-            showSection('search');
-        });
-    </script>
+    <script src="app.js"></script>
 </body>
 </html>
